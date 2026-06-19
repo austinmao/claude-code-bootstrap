@@ -14,6 +14,7 @@
 | **ecc** | Everything Claude Code: 100+ agents, skills, and coding rules |
 | **canary** | Browser QA automation |
 | **codex** | OpenAI Codex integration |
+| **claude-md-management** | Audit and improve CLAUDE.md files across your projects |
 | **ruflo** | Multi-agent swarm orchestration |
 | **feature-fix-swarm** | Feature/fix lifecycle with Stop hooks and run-state tracking |
 | **MCPs** | Context7, Playwright, Sequential Thinking, Memory, Fetch + optional GitHub/Exa |
@@ -46,6 +47,7 @@ claude plugin marketplace add https://github.com/mksglu/context-mode
 claude plugin marketplace add https://github.com/affaan-m/everything-claude-code
 claude plugin marketplace add https://github.com/wizenheimer/canary
 claude plugin marketplace add https://github.com/openai/codex-plugin-cc
+claude plugin marketplace add https://github.com/anthropics/claude-plugins-official
 ```
 
 Verify: `claude plugin marketplace list`
@@ -61,6 +63,7 @@ claude plugin install context-mode
 claude plugin install ecc
 claude plugin install canary
 claude plugin install codex
+claude plugin install claude-md-management
 ```
 
 Verify: `claude plugin list`
@@ -401,7 +404,27 @@ If yes, write to `~/.claude/CLAUDE.md`:
 
 ---
 
-## Step 11 — Verify
+## Step 11 — Improve CLAUDE.md
+
+Invoke the `claude-md-improver` skill to audit and improve any CLAUDE.md files in the current project:
+
+```
+Use the Skill tool: claude-md-management:claude-md-improver
+```
+
+The skill will:
+1. Find all CLAUDE.md files in the repository
+2. Score each one against quality criteria (commands, architecture, gotchas, conciseness)
+3. Output a quality report with scores and recommendations
+4. Ask the user which improvements to apply
+
+If the user is still inside the bootstrap repo (no project CLAUDE.md), tell them:
+
+> "Run `/claude-md-management:claude-md-improver` inside any of your own projects to audit and improve their CLAUDE.md files."
+
+---
+
+## Step 12 — Verify
 
 ```bash
 claude plugin list
@@ -411,6 +434,8 @@ ls ~/feature-fix-swarm/
 ls ~/.claude/rules/common/
 ls ~/.claude/agents/
 ```
+
+Expected plugins include: `superpowers`, `caveman`, `context-mode`, `ecc`, `canary`, `codex`, `claude-md-management`.
 
 Report results to the user. Call out anything missing or failed.
 
@@ -424,6 +449,7 @@ Tell the user:
 >
 > **Quick reference:**
 > - `/ecc-guide` — discover all ECC skills and agents
+> - `/claude-md-management:claude-md-improver` — audit and improve CLAUDE.md in any project
 > - `/feature` — start a tracked feature run (feature-fix-swarm)
 > - Ruflo swarms: `mcp__ruflo__swarm_init` for 3+ parallel agents
 > - Caveman mode: type `/caveman` for terse responses

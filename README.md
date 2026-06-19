@@ -21,6 +21,7 @@ That's it. The agent handles everything.
 | ⚡ | ecc (Everything Claude Code) | [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) |
 | 🐦 | canary | [wizenheimer/canary](https://github.com/wizenheimer/canary) |
 | 🤖 | codex | [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) |
+| 📝 | claude-md-management | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) |
 
 ### Tools & MCPs
 | | Tool | Notes |

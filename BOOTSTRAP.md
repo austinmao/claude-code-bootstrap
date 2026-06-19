@@ -28,11 +28,15 @@
 ```bash
 claude --version
 node --version
-brew --version
+python3 --version
 ```
 
 If `claude` is missing: stop and tell the user to install Claude Code from https://claude.ai/code.  
-If `brew` is missing on macOS: install Homebrew first (`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`).
+If `python3` is missing: stop and tell the user to install Python 3 from https://python.org.  
+Check if `uv` is available: `uv --version`. If missing, install it:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 ---
 
@@ -73,13 +77,13 @@ Verify: `claude plugin list`
 ## Step 4 — Install ruflo (swarm orchestration)
 
 ```bash
-brew install ruflo
+npm install -g ruflo
 ```
 
 Then register as MCP:
 
 ```bash
-claude mcp add ruflo -- /opt/homebrew/bin/ruflo mcp start
+claude mcp add ruflo -- ruflo mcp start
 ```
 
 Verify: `ruflo --version`
@@ -93,7 +97,7 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp
 claude mcp add sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
 claude mcp add playwright -- npx -y @executeautomation/playwright-mcp-server
 claude mcp add memory -- npx -y @modelcontextprotocol/server-memory
-claude mcp add fetch -- npx -y @modelcontextprotocol/server-fetch
+claude mcp add fetch -- uvx mcp-server-fetch
 ```
 
 ---

@@ -11,7 +11,7 @@
 | **superpowers** | Workflow meta-skills: brainstorming, debugging, TDD, git worktrees |
 | **caveman** | Terse response mode — saves tokens on long sessions |
 | **context-mode** | Context window management tools |
-| **ecc** | Everything Claude Code: 100+ agents, skills, and coding rules |
+| **ecc** | Everything Claude Code: 66 agents, 268 skills, 84 command shims, hooks, rules. Source: [affaan-m/ECC](https://github.com/affaan-m/ecc). Plugin slug `ecc@ecc`. **Rules require a separate install step after the plugin** (see Step 3). |
 | **canary** | Browser QA automation |
 | **codex** | OpenAI Codex integration |
 | **claude-md-management** | Audit and improve CLAUDE.md files across your projects |
@@ -51,7 +51,7 @@ Run each of these:
 claude plugin marketplace add https://github.com/obra/superpowers-marketplace
 claude plugin marketplace add https://github.com/JuliusBrussee/caveman
 claude plugin marketplace add https://github.com/mksglu/context-mode
-claude plugin marketplace add https://github.com/affaan-m/everything-claude-code
+claude plugin marketplace add https://github.com/affaan-m/ECC
 claude plugin marketplace add https://github.com/wizenheimer/canary
 claude plugin marketplace add https://github.com/openai/codex-plugin-cc
 claude plugin marketplace add https://github.com/anthropics/claude-plugins-official
@@ -67,13 +67,26 @@ Verify: `claude plugin marketplace list`
 claude plugin install superpowers
 claude plugin install caveman
 claude plugin install context-mode
-claude plugin install ecc
+claude plugin install ecc@ecc
 claude plugin install canary
 claude plugin install codex
 claude plugin install claude-md-management
 ```
 
 Verify: `claude plugin list`
+
+**ECC rules are not distributed via the plugin.** After the plugin installs, run the ECC OSS installer to get rules, hooks, and the full agent/skill set:
+
+```bash
+npx ecc-install --profile full --target claude
+```
+
+> **Do not stack installers.** Run `npx ecc-install` AFTER `claude plugin install ecc@ecc`, never before. Stacking both in the wrong order causes duplicate skills and duplicate hook behavior. If things look duplicated, uninstall ECC and re-install in order.
+
+Verify ECC installed correctly:
+```bash
+npx ecc status
+```
 
 ---
 
@@ -471,9 +484,10 @@ ls ~/feature-fix-swarm/
 ls ~/.claude/rules/common/
 ls ~/.claude/agents/
 ls ~/.claude/skills/ 2>/dev/null | head -20
+npx ecc status 2>/dev/null || echo "ecc: check 'npx ecc-install --profile full --target claude' was run"
 ```
 
-Expected plugins include: `superpowers`, `caveman`, `context-mode`, `ecc`, `canary`, `codex`, `claude-md-management`.
+Expected plugins include: `superpowers`, `caveman`, `context-mode`, `ecc@ecc`, `canary`, `codex`, `claude-md-management`.
 Expected skills include: `feature`, `feature-implement`, `feature-spec`, `fix`, `spec-decompose`.
 Optional skills (require `codex` CLI): `codex-gate` — if `codex` is installed, verify with:
 ```bash

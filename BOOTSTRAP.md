@@ -19,6 +19,7 @@
 | **feature-fix-swarm** | Feature/fix lifecycle with Stop hooks and run-state tracking |
 | **speckit** | Spec-first pipeline CLI: `/speckit.specify`, `/speckit.plan`, `/speckit.clarify`, `/speckit.analyze` — installed by feature-fix-swarm setup.sh via [github/spec-kit](https://github.com/github/spec-kit) |
 | **gstack** | Session memory browser (`$B`) and web skill — installed by feature-fix-swarm setup.sh |
+| **codex-gate** | Cross-model adversarial phase review (Claude + Codex/GPT-4o, 3 passes). **Auto-installed by setup.sh only if `codex` CLI is present.** Requires `npm install -g @openai/codex` + `OPENAI_API_KEY`. |
 | **MCPs** | Context7, Playwright, Sequential Thinking, Memory, Fetch + optional GitHub/Exa |
 | **Agents** | 12 specialist agents: frontend, backend, Python, API, MCP, QA, and more |
 | **Rules** | 9 coding rule files covering style, git, testing, security, performance, agents, patterns |
@@ -146,6 +147,14 @@ It also installs the following dependencies automatically:
 | **goal-wrap** | `/goal-wrap` and `/handoff` skills | [austinmao/goal-wrap](https://github.com/austinmao/goal-wrap) |
 | **prompt-master** | `/prompt-master` skill | [nidhinjs/prompt-master](https://github.com/nidhinjs/prompt-master) |
 | **run-state CLI** | `~/.claude/bin/run-state` pipeline run tracker | bundled in feature-fix-swarm |
+| **codex-gate** | `/codex-gate` cross-model phase review skill — **auto-installed only if `codex` CLI is detected** | bundled in feature-fix-swarm |
+
+**codex-gate activation:** `setup.sh` checks for `codex` at install time. If found, it silently installs the skill. If not found, it logs a one-line hint and skips — no user prompt, no blocking. To activate later:
+```bash
+npm install -g @openai/codex   # install codex CLI
+cd ~/feature-fix-swarm && bash setup.sh   # re-run (idempotent, picks up codex-gate)
+```
+`OPENAI_API_KEY` must be set in your environment for the Codex pass to run.
 
 If `setup.sh` reports missing dependencies, re-run it after resolving them (it is idempotent).
 
@@ -311,9 +320,9 @@ Ruflo swarm workers: default to Haiku.
 0. Research — GitHub search first, then docs, then Exa
 1. Spec — /feature-spec NNN (specify + plan + clarify with TDD/BDD/E2E contracts)
 2. Plan — /autoplan (architecture review + taste decisions)
-3. Decompose — /spec-decompose NNN → tasks.md
+3. Decompose — /spec-decompose NNN → tasks.md (each phase ends with /codex-gate task)
 4. TDD — write tests first (RED), implement (GREEN), refactor (IMPROVE)
-5. Phase gate — /codex-gate after each phase
+5. Phase gate — /codex-gate after each phase (auto-wired by /spec-decompose)
 6. Code review — immediately after writing code
 7. QA — /qa on ALL e2e specs before marking done
 8. Design review — if any visual changes
@@ -374,7 +383,6 @@ Agents installed:
 - **ai-agent-workflow-engineer** — LangGraph, RAG, multi-agent orchestration
 - **mcp-server-engineer** — MCP server development (TypeScript + Python)
 - **n8n-engineer** — n8n workflow automation, custom nodes
-- **nextjs-backend-engineer** — Next.js API routes, tRPC, server patterns
 - **trpc-api-engineer** — tRPC v11, Zod, Drizzle ORM
 - **code-auditor** — multi-language code quality audit
 - **testing-quality-assurance-engineer** — pytest, Vitest, Playwright, coverage
@@ -406,8 +414,8 @@ If yes, write to `~/.claude/CLAUDE.md`:
 ## Speccing features (mandatory order)
 1. /feature-spec NNN — specify + plan + clarify with TDD/BDD/E2E contracts
 2. /autoplan — architecture review
-3. /spec-decompose NNN — break plan into tasks.md
-4. /feature-implement NNN — execute with per-phase QA
+3. /spec-decompose NNN — break plan into tasks.md (each impl phase ends with /codex-gate)
+4. /feature-implement NNN — execute with per-phase QA + codex-gate
 
 ## Testing
 - TDD: write test first, then implement
@@ -467,6 +475,10 @@ ls ~/.claude/skills/ 2>/dev/null | head -20
 
 Expected plugins include: `superpowers`, `caveman`, `context-mode`, `ecc`, `canary`, `codex`, `claude-md-management`.
 Expected skills include: `feature`, `feature-implement`, `feature-spec`, `fix`, `spec-decompose`.
+Optional skills (require `codex` CLI): `codex-gate` — if `codex` is installed, verify with:
+```bash
+ls ~/.claude/skills/codex-gate/SKILL.md && echo "codex-gate: OK" || echo "codex-gate: not installed (run: npm install -g @openai/codex && cd ~/feature-fix-swarm && bash setup.sh)"
+```
 
 Report results to the user. Call out anything missing or failed.
 
@@ -484,7 +496,8 @@ Tell the user:
 > - `/feature-spec NNN` — write spec with TDD+BDD+E2E contracts (speckit.specify → plan → clarify)
 > - `/feature NNN` — start a tracked feature run (feature-fix-swarm)
 > - `/fix "bug description"` — investigate + fix + verify loop
+> - `/codex-gate` — cross-model adversarial phase review (requires codex CLI + OPENAI_API_KEY)
 > - Ruflo swarms: `mcp__ruflo__swarm_init` for 3+ parallel agents
 > - Caveman mode: type `/caveman` for terse responses
 > - Memory MCP: persistent knowledge graph across sessions
-> - Specialist agents: nextjs-frontend-engineer, python-engineer, mcp-server-engineer, and 9 more in `~/.claude/agents/`
+> - Specialist agents: nextjs-frontend-engineer, python-engineer, mcp-server-engineer, and more in `~/.claude/agents/`

@@ -17,6 +17,8 @@
 | **claude-md-management** | Audit and improve CLAUDE.md files across your projects |
 | **ruflo** | Multi-agent swarm orchestration |
 | **feature-fix-swarm** | Feature/fix lifecycle with Stop hooks and run-state tracking |
+| **speckit** | Spec-first pipeline CLI: `/speckit.specify`, `/speckit.plan`, `/speckit.clarify`, `/speckit.analyze` — installed by feature-fix-swarm setup.sh via [github/spec-kit](https://github.com/github/spec-kit) |
+| **gstack** | Session memory browser (`$B`) and web skill — installed by feature-fix-swarm setup.sh |
 | **MCPs** | Context7, Playwright, Sequential Thinking, Memory, Fetch + optional GitHub/Exa |
 | **Agents** | 12 specialist agents: frontend, backend, Python, API, MCP, QA, and more |
 | **Rules** | 9 coding rule files covering style, git, testing, security, performance, agents, patterns |
@@ -133,7 +135,19 @@ git clone https://github.com/austinmao/feature-fix-swarm ~/feature-fix-swarm
 cd ~/feature-fix-swarm && bash setup.sh
 ```
 
-This installs Stop and SessionStart hooks for feature/fix lifecycle tracking.
+`setup.sh` installs Stop and SessionStart hooks for feature/fix lifecycle tracking.
+It also installs the following dependencies automatically:
+
+| Dependency | What it installs | Source |
+|------------|-----------------|--------|
+| **speckit** | `specify` CLI + `/speckit.specify`, `/speckit.plan`, `/speckit.clarify`, `/speckit.analyze` slash commands | [github/spec-kit](https://github.com/github/spec-kit) via `uv tool install specify-cli` |
+| **gstack** | Session memory + `$B` web browsing skill | [garryslist/gstack](https://github.com/garryslist/gstack) |
+| **ruflo CLI** | `ruflo` binary for swarm agent orchestration | npm global |
+| **goal-wrap** | `/goal-wrap` and `/handoff` skills | [austinmao/goal-wrap](https://github.com/austinmao/goal-wrap) |
+| **prompt-master** | `/prompt-master` skill | [nidhinjs/prompt-master](https://github.com/nidhinjs/prompt-master) |
+| **run-state CLI** | `~/.claude/bin/run-state` pipeline run tracker | bundled in feature-fix-swarm |
+
+If `setup.sh` reports missing dependencies, re-run it after resolving them (it is idempotent).
 
 ---
 
@@ -295,13 +309,15 @@ Ruflo swarm workers: default to Haiku.
 
 ## Phase order (mandatory)
 0. Research — GitHub search first, then docs, then Exa
-1. Plan — TDD/BDD specs required up front
-2. TDD — write tests first (RED), implement (GREEN), refactor (IMPROVE)
-3. Phase gate — codex-gate after each phase
-4. Code review — immediately after writing code
-5. QA — /qa on ALL e2e specs before marking done
-6. Design review — if any visual changes
-7. Commit & push
+1. Spec — /feature-spec NNN (specify + plan + clarify with TDD/BDD/E2E contracts)
+2. Plan — /autoplan (architecture review + taste decisions)
+3. Decompose — /spec-decompose NNN → tasks.md
+4. TDD — write tests first (RED), implement (GREEN), refactor (IMPROVE)
+5. Phase gate — /codex-gate after each phase
+6. Code review — immediately after writing code
+7. QA — /qa on ALL e2e specs before marking done
+8. Design review — if any visual changes
+9. Commit & push
 
 ## Never declare done
 Say "ready for QA" not "done" if /qa hasn't run yet.
@@ -387,9 +403,17 @@ If yes, write to `~/.claude/CLAUDE.md`:
 - Commit: `<type>: <description>` (feat/fix/refactor/docs/test/chore/perf/ci)
 - Parallel work → separate git worktrees, never switch branches in main
 
+## Speccing features (mandatory order)
+1. /feature-spec NNN — specify + plan + clarify with TDD/BDD/E2E contracts
+2. /autoplan — architecture review
+3. /spec-decompose NNN — break plan into tasks.md
+4. /feature-implement NNN — execute with per-phase QA
+
 ## Testing
 - TDD: write test first, then implement
 - Minimum 80% coverage
+- BDD scenarios (Given/When/Then) required for all user-facing flows
+- E2E Playwright stubs required before implementation begins
 
 ## Security
 - Zero hardcoded secrets — env vars always
@@ -434,12 +458,15 @@ If the user is still inside the bootstrap repo (no project CLAUDE.md), tell them
 claude plugin list
 claude mcp list
 ruflo --version
+specify --version 2>/dev/null || echo "speckit: check 'uv tool list | grep specify'"
 ls ~/feature-fix-swarm/
 ls ~/.claude/rules/common/
 ls ~/.claude/agents/
+ls ~/.claude/skills/ 2>/dev/null | head -20
 ```
 
 Expected plugins include: `superpowers`, `caveman`, `context-mode`, `ecc`, `canary`, `codex`, `claude-md-management`.
+Expected skills include: `feature`, `feature-implement`, `feature-spec`, `fix`, `spec-decompose`.
 
 Report results to the user. Call out anything missing or failed.
 
@@ -454,7 +481,9 @@ Tell the user:
 > **Quick reference:**
 > - `/ecc-guide` — discover all ECC skills and agents
 > - `/claude-md-management:claude-md-improver` — audit and improve CLAUDE.md in any project
-> - `/feature` — start a tracked feature run (feature-fix-swarm)
+> - `/feature-spec NNN` — write spec with TDD+BDD+E2E contracts (speckit.specify → plan → clarify)
+> - `/feature NNN` — start a tracked feature run (feature-fix-swarm)
+> - `/fix "bug description"` — investigate + fix + verify loop
 > - Ruflo swarms: `mcp__ruflo__swarm_init` for 3+ parallel agents
 > - Caveman mode: type `/caveman` for terse responses
 > - Memory MCP: persistent knowledge graph across sessions
